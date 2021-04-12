@@ -1,0 +1,35 @@
+<nav role="navigation" class="navbar navbar-expand-md navbar-dark bg-dark">
+  <a class="navbar-brand" href="#">Recipe Book</a>
+
+  <button (click)="toggleCollapsed()" class="navbar-toggler" type="button"><span class="navbar-toggler-icon" data-toggle="collapse" data-target="#navbarContent"></span></button>
+
+  <div  [ngClass]="{'collapse': collapsed, 'navbar-collapse': true}" id="navbarContent">
+    <ul class="navbar-nav mr-auto  ml-md-4 navbar-sidebar">
+      <li class="nav-item" *ngIf="isAuthenticated">
+        <a class="nav-link" routerLink="/recipes"  routerLinkActive="active">Recipes</a>
+      </li>
+      <li class="nav-item ml-md-5" *ngIf="!isAuthenticated">
+        <a class="nav-link" routerLink="/auth" routerLinkActive="active">Authenticate</a>
+      </li>
+      <li class="nav-item ml-md-5">
+        <a class="nav-link" routerLink="/shopping-list" routerLinkActive="active">Shopping List</a>
+      </li>
+      <li style="cursor: pointer;" class="nav-item ml-md-5" *ngIf="isAuthenticated" (click)="onLogout()">
+        <a class="nav-link">Logout</a>
+      </li>
+    </ul>
+    <ul class="navbar-nav">
+
+      <li class="nav-item dropdown" style="cursor: pointer;" *ngIf="isAuthenticated">
+        <a class="nav-link dropdown-toggle"  (click)="show = !show" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Manage
+        </a>
+        <div class="dropdown-menu" [ngClass]="{'show': show}" (mouseleave)="show = false" aria-labelledby="navbarDropdownMenuLink">
+          <a class="dropdown-item" (click)="onSaveData()">Save Data</a>
+          <a class="dropdown-item" (click)="onFetchData()">Fetch Data</a>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
+
