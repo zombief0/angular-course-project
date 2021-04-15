@@ -2,12 +2,17 @@ import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angula
 import {DataStorageService} from '../shared/data-storage.service';
 import {AuthService} from '../auth/auth.service';
 import {Subscription} from 'rxjs';
+import {Store} from '@ngrx/store';
+import {AppState} from '../store/app.reducer';
+import {map} from 'rxjs/operators';
+import {Logout} from '../auth/store/auth.action';
+import {FetchRecipes} from '../recipes/store/recipes.actions';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html'
 })
-export class HeaderComponent implements OnInit, OnDestroy{
+export class HeaderComponent implements OnInit, OnDestroy {
   show = false;
   collapsed = true;
   @Output() menuEvent = new EventEmitter<number>();
@@ -19,7 +24,8 @@ export class HeaderComponent implements OnInit, OnDestroy{
     this.collapsed = !this.collapsed;
   }
 
-  constructor(private dataStorageService: DataStorageService, private authService: AuthService) {
+  constructor(private dataStorageService: DataStorageService,
+              private authService: AuthService, private store: Store<AppState>) {
   }
 
   onSaveData(): void {
@@ -27,13 +33,18 @@ export class HeaderComponent implements OnInit, OnDestroy{
   }
 
   onFetchData(): void {
-    this.dataStorageService.fetchRecipe().subscribe();
+    // this.dataStorageService.fetchRecipe().subscribe();
+    this.store.dispatch(new FetchRecipes());
   }
 
   ngOnInit(): void {
-    this.userSub = this.authService.userObject.subscribe(user => {
-      this.isAuthenticated = !!user;
-    });
+    this.userSub = this.store.select('auth')
+      .pipe(map(authState => {
+        return authState.user;
+      }))
+      .subscribe(user => {
+        this.isAuthenticated = !!user;
+      });
   }
 
   ngOnDestroy(): void {
@@ -41,6 +52,7 @@ export class HeaderComponent implements OnInit, OnDestroy{
   }
 
   onLogout(): void {
-    this.authService.logout();
+    // this.authService.logout();
+    this.store.dispatch(new Logout());
   }
 }

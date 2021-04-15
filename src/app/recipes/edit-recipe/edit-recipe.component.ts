@@ -2,6 +2,9 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AbstractControl, FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
 import {RecipesService} from '../../services/recipes.service';
+import {AppState} from '../../store/app.reducer';
+import {Store} from '@ngrx/store';
+import {map} from 'rxjs/operators';
 
 @Component({
   selector: 'app-edit-recipe',
@@ -14,7 +17,8 @@ export class EditRecipeComponent implements OnInit {
   recipeForm: FormGroup;
 
   constructor(private activeRoute: ActivatedRoute,
-              private recipesService: RecipesService, private router: Router) {
+              private recipesService: RecipesService,
+              private router: Router, private store: Store<AppState>) {
   }
 
   ngOnInit(): void {
@@ -33,19 +37,26 @@ export class EditRecipeComponent implements OnInit {
     let recipeDescription = '';
     const recipeIngredients = new FormArray([]);
     if (this.editMode) {
-      const recipe = this.recipesService.getRecipeByIndex(this.index);
-      recipeName = recipe.name;
-      recipeDescription = recipe.description;
-      recipeImagePath = recipe.imagePath;
-      if (recipe.ingredients != null) {
-        for (const ing of recipe.ingredients) {
-          recipeIngredients.push(new FormGroup({
-            name: new FormControl(ing.name, Validators.required),
-            amount: new FormControl(ing.amount, [Validators.required,
-              Validators.min(0)])
-          }));
+      this.store.select('recipes').pipe(map(recipeState => {
+        return recipeState.recipes.find((r, i) => {
+          return i === this.index;
+        });
+      })).subscribe(recipe => {
+        recipeName = recipe.name;
+        recipeDescription = recipe.description;
+        recipeImagePath = recipe.imagePath;
+        if (recipe.ingredients != null) {
+          for (const ing of recipe.ingredients) {
+            recipeIngredients.push(new FormGroup({
+              name: new FormControl(ing.name, Validators.required),
+              amount: new FormControl(ing.amount, [Validators.required,
+                Validators.min(0)])
+            }));
+          }
         }
-      }
+      });
+      // const recipe = this.recipesService.getRecipeByIndex(this.index);
+
     }
     this.recipeForm = new FormGroup({
       name: new FormControl(recipeName, Validators.required),

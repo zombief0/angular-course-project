@@ -2,13 +2,16 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {RecipesService} from '../services/recipes.service';
 import {Recipe} from '../recipes/recipe.model';
-import { map, tap} from 'rxjs/operators';
+import {map, tap} from 'rxjs/operators';
 import {Observable} from 'rxjs';
+import {Store} from '@ngrx/store';
+import {AppState} from '../store/app.reducer';
+import {SetRecipes} from '../recipes/store/recipes.actions';
 
 @Injectable({providedIn: 'root'})
 export class DataStorageService {
   constructor(private http: HttpClient,
-              private recipeService: RecipesService) {
+              private recipeService: RecipesService, private store: Store<AppState>) {
   }
 
   storeRecipe(): void {
@@ -21,14 +24,16 @@ export class DataStorageService {
   }
 
   fetchRecipe(): Observable<Recipe[]> {
-      return  this.http
-        .get<Recipe[]>('https://angular-course-project-76922-default-rtdb.firebaseio.com/recipes.json').pipe(map(recipes => {
-        return recipes.map(recipe => {
-          return {...recipe, ingredients: recipe.ingredients ? recipe.ingredients : []};
-        });
-      }),
-      tap(recipes => {
-        this.recipeService.setRecipes(recipes);
-      }));
+    return this.http
+      .get<Recipe[]>('https://angular-course-project-76922-default-rtdb.firebaseio.com/recipes.json').pipe(
+        map(recipes => {
+          return recipes.map(recipe => {
+            return {...recipe, ingredients: recipe.ingredients ? recipe.ingredients : []};
+          });
+        }),
+        tap(recipes => {
+          // this.recipeService.setRecipes(recipes);
+          this.store.dispatch(new SetRecipes(recipes));
+        }));
   }
 }
