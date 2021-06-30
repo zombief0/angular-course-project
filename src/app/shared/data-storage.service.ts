@@ -13,11 +13,11 @@ export class DataStorageService {
 
   storeRecipe(): void {
     const recipes = this.recipeService.getRecipes();
-    this.http
+    /*this.http
       .put('https://angular-course-project-76922-default-rtdb.firebaseio.com/recipes.json',
         recipes).subscribe(response => {
       console.log(response);
-    });
+    });*/
   }
 
   fetchRecipe(): Observable<Recipe[]> {
